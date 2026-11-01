@@ -1,0 +1,50 @@
+apple
+sun
+house
+cat
+bicycle
+The Eiffel Tower
+fish
+star
+umbrella
+car
+dog
+cup
+mug
+banana
+tree
+clock
+guitar
+airplane
+key
+ladder
+mushroom
+scissors
+hat
+snowman
+envelope
+tiger
+lion
+coffee cup
+circle
+donut
+wheel
+truck
+bus
+van
+violin
+cello
+helicopter
+bird
+duck
+owl
+palm tree
+bush
+alarm clock
+wristwatch
+moon
+cloud
+flower
+bear
+sheep
+rabbit
