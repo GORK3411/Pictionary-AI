@@ -44,28 +44,35 @@ def transform(raw_record,max_rec):
     
     add_to_ratio = 1/max_rec
     res = []
-    #empty array
-    draw = [[0] * 256 for _ in range(256)]
+    
     total_pixel_count = 0
     #xs = stroke[0], ys = stroke[1]
     for xs, ys in raw_record["drawing"]:
         for i in range(len(xs) - 1):
-            total_pixel_count += draw_line(draw, xs[i], ys[i], xs[i + 1], ys[i + 1])
+            total_pixel_count += count_pixels(xs[i], ys[i], xs[i + 1], ys[i + 1])
 
-    draw = [[0] * 256 for _ in range(256)]
+    #draw contains all the points needed to recreate the image
+    draw = []
     pixel_count = 0
     threshold = 0
     for xs, ys in raw_record["drawing"]:
-        for i in range(len(xs) - 1):
-            pixel_count += draw_line(draw, xs[i], ys[i], xs[i + 1], ys[i + 1])
+        cur = []
+        cur.append((xs[0],ys[0]))
+        draw.append(cur)
+        for i in range(1,len(xs)):
+            cur.append((xs[i],ys[i]))
+            pixel_count += count_pixels(xs[i-1], ys[i-1], xs[i], ys[i])
             ratio = pixel_count/total_pixel_count
             if(ratio == 1 or ratio >= threshold):
                 res.append({
+                    "key_id":raw_record["key_id"],
                     "word":raw_record["word"],
                     "completeness":ratio,
+                    #"recognized":raw_record["recognized"],
                     "drawing":copy.deepcopy(draw),
                 })
-                threshold+=add_to_ratio
+                while(ratio>= threshold):
+                    threshold+=add_to_ratio
     return res
 
 """
@@ -86,6 +93,22 @@ def draw_line(draw, x0, y0, x1, y1):
         x = round(x0 + (x1 - x0) * t / steps)
         y = round(y0 + (y1 - y0) * t / steps)
         draw[y][x] = 1
+    return steps + 1
+
+"""
+inputs:
+- draw: 2d array to edit
+- x0: x of the first point
+- y0: y of the first point
+- x1: x of the second point
+- y1: y of the second point
+
+description:
+return how many pixel will be added when drawing the stroke from the first point to the second point
+"""
+def count_pixels(x0, y0, x1, y1):
+    """Set every pixel on the line from (x0, y0) to (x1, y1)."""
+    steps = max(abs(x1 - x0), abs(y1 - y0), 1)
     return steps + 1
 
 """
@@ -125,17 +148,19 @@ if __name__ == "__main__":
     categories_path = CATEGORIES_PATH/(str(size)+".txt")
 
     if(not categories_path.exists()):
-        exit
+        exit()
     categories = c.get_categories(categories_path)
     extract(categories)
+    
+    cur_out_file = os.path.join(PROCESSED_DATA_PATH,"cleaned.ndjson")
+    with open(cur_out_file,"w"):
+                pass
     for cat in categories:
         
         cur_in_file = os.path.join(RAW_DATA_PATH,f"{cat}.ndjson")
-        cur_out_file = os.path.join(PROCESSED_DATA_PATH,f"{cat}.ndjson")
         counter = 0
         
-        with open(cur_out_file,"w"):
-            pass
+       
 
         with open(cur_in_file,"r") as f:
             for line in f:
@@ -145,4 +170,14 @@ if __name__ == "__main__":
                 counter+=1
                 if(counter>=images_per_category):
                     break
+
+    #split the data into train/test/split
+
+    #read the content of data/processed/cleaned.ndjson
+
+    #create a dcitionary{key: record}
+
+    #split the dictionary 80%/10%/10%
+
+    #save each one in a file
     print("done")
