@@ -38,7 +38,8 @@ description:
 using the original drawing, create an array where each item has the following values:
 - word: the label of the record
 - ratio: the percentage of completeness of the drawing
-- drawing: a 2d array filled with 0(empty) and 1(filled)  
+- drawing: the partial drawing, in the same format as the original dataset:
+  a list of strokes, each stroke being [[x0, x1, ...], [y0, y1, ...]]
 """
 def transform(raw_record,max_rec):
     
@@ -56,11 +57,12 @@ def transform(raw_record,max_rec):
     pixel_count = 0
     threshold = 0
     for xs, ys in raw_record["drawing"]:
-        cur = []
-        cur.append((xs[0],ys[0]))
+        #same format as the original dataset: cur = [[x0, x1, ...], [y0, y1, ...]]
+        cur = [[xs[0]], [ys[0]]]
         draw.append(cur)
         for i in range(1,len(xs)):
-            cur.append((xs[i],ys[i]))
+            cur[0].append(xs[i])
+            cur[1].append(ys[i])
             pixel_count += count_pixels(xs[i-1], ys[i-1], xs[i], ys[i])
             ratio = pixel_count/total_pixel_count
             if(ratio == 1 or ratio >= threshold):
